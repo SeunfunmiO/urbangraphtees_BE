@@ -1,0 +1,432 @@
+const express = require('express')
+const nodemailer = require('nodemailer')
+const newsletter = require('../models/newsletter.model')
+const app = express()
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+
+
+const subscribe = async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ mesage: 'Email is required' })
+    try {
+        const existing = await newsletter.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ mesage: 'Already subscribed' })
+        }
+        const newSub = await newsletter.create({ email })
+
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.NODE_MAIL,
+                pass: process.env.MAIL_PASS
+            }
+        });
+
+        let mailOptions = {
+            from: 'Urbangraphtees',
+            to: email,
+            subject: 'Thank you for subscribing to our Newsletter',
+            html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You for Subscribing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background-color: #000000;
+      padding: 50px 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #000 0%, #666 50%, #000 100%);
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      color: #cccccc;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .content {
+      padding: 50px 40px;
+    }
+
+    .thank-you-icon {
+      text-align: center;
+      font-size: 4rem;
+      margin-bottom: 25px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .main-heading {
+      text-align: center;
+      font-size: 2rem;
+      color: #000000;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .welcome-text {
+      text-align: center;
+      color: #666666;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .benefits-section {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 8px;
+      margin: 30px 0;
+      border-left: 4px solid #000000;
+    }
+
+    .benefits-title {
+      font-size: 1.3rem;
+      color: #000000;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      transition: transform 0.3s ease;
+    }
+
+    .benefit-item:hover {
+      transform: translateX(5px);
+    }
+
+    .benefit-icon {
+      font-size: 1.5rem;
+      margin-right: 15px;
+      min-width: 30px;
+    }
+
+    .benefit-text {
+      color: #333333;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .benefit-text strong {
+      color: #000000;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .cta-section {
+      text-align: center;
+      margin: 40px 0;
+      padding: 40px 30px;
+      background: linear-gradient(135deg, #000000 0%, #333333 100%);
+      border-radius: 8px;
+      color: white;
+    }
+
+    .cta-heading {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .cta-text {
+      font-size: 1rem;
+      margin-bottom: 25px;
+      color: #cccccc;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: white;
+      color: #000000;
+      padding: 15px 40px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .cta-button:hover {
+      background-color: #f5f5f5;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #ddd 50%, transparent 100%);
+      margin: 40px 0;
+    }
+
+    .footer {
+      background-color: #000000;
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .social-links {
+      margin: 25px 0;
+    }
+
+    .social-link {
+      display: inline-block;
+      width: 45px;
+      height: 45px;
+      margin: 0 8px;
+      background-color: #333333;
+      color: white;
+      text-decoration: none;
+      border-radius: 50%;
+      line-height: 45px;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background-color: white;
+      color: #000000;
+      transform: translateY(-3px);
+    }
+
+    .footer-text {
+      color: #999999;
+      font-size: 0.85rem;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .footer-text a {
+      color: white;
+      text-decoration: none;
+      border-bottom: 1px solid white;
+    }
+
+    .unsubscribe {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #333333;
+    }
+
+    .unsubscribe a {
+      color: #666666;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+
+      .header {
+        padding: 40px 20px;
+      }
+
+      .logo {
+        font-size: 2rem;
+      }
+
+      .content {
+        padding: 30px 20px;
+      }
+
+      .main-heading {
+        font-size: 1.6rem;
+      }
+
+      .welcome-text {
+        font-size: 1rem;
+      }
+
+      .benefits-section {
+        padding: 20px;
+      }
+
+      .cta-section {
+        padding: 30px 20px;
+      }
+
+      .cta-button {
+        padding: 12px 30px;
+        font-size: 0.9rem;
+      }
+
+      .footer {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="email-container">
+    <div class="header">
+      <div class="logo"><img src="./multimedia/ugtBlackLogo.jpg" alt="logo"></div>
+      <div class="tagline">Elevate Your Style</div>
+    </div>
+
+    <div class="content">
+      <div class="thank-you-icon">🖤</div>
+
+      <h1 class="main-heading">Thank You for Subscribing!</h1>
+
+      <p class="welcome-text">
+        Welcome to our exclusive community! We're thrilled to have you on board.
+        Get ready to receive curated updates, insider deals, and style inspiration
+        delivered straight to your inbox.
+      </p>
+
+
+      <div class="benefits-section">
+        <h2 class="benefits-title">What's Coming Your Way:</h2>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">🎁</div>
+          <div class="benefit-text">
+            <strong>Exclusive Offers</strong>
+            Be the first to know about flash sales, limited editions, and subscriber-only discounts
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">✨</div>
+          <div class="benefit-text">
+            <strong>New Arrivals</strong>
+            Get early access to our latest collections before anyone else
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">💡</div>
+          <div class="benefit-text">
+            <strong>Style Tips & Trends</strong>
+            Expert fashion advice and trending looks curated just for you
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">🎉</div>
+          <div class="benefit-text">
+            <strong>Birthday Surprises</strong>
+            Special treats and gifts to celebrate your special day
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+
+      <div class="cta-section">
+        <h3 class="cta-heading">Ready to Start Shopping?</h3>
+        <p class="cta-text">Explore our latest collection and discover your next favorite piece</p>
+        <a href="#" class="cta-button">Shop Now</a>
+      </div>
+    </div>
+
+
+    <div class="footer">
+      <div class="social-links">
+        <a href="https://www.instagram.com/urbangraphtees_thebrand/" class="social-link"><i
+            class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="social-link">📷</a>
+        <a href="#" class="social-link">🐦</a>
+        <a href="#" class="social-link">in</a>
+      </div>
+
+      <div class="footer-text">
+        <p>© 2025 Urbangraphtees. All rights reserved.</p>
+        <p>Surulere,Lagos, Nigeria</p>
+        <p>Questions? <a href="mailto:urbangraphtees@gmail.com">Contact us</a></p>
+      </div>
+
+      <div class="unsubscribe">
+        <a href="#">Unsubscribe</a> | <a href="#">Update Preferences</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`
+        }
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+        res.status(201).json({ message: 'Subcription successful', newSub })
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error' })
+    }
+}
+
+module.exports = { subscribe }
