@@ -56,7 +56,7 @@ const signUp = async (req, res) => {
       // res.send({ status: true, message: '✔ Account created successfully' })
       // const emailTemplatePath = path.join(__dirname, '/views/email-template/welcome-email.ejs')
       let mailOptions = {
-        from: 'Urbangraphtees',
+        from: process.env.NODE_MAIL,
         to: email,
         subject: 'Welcome to Urbangraphtees',
         html: `<!DOCTYPE html>
@@ -134,7 +134,7 @@ const signUp = async (req, res) => {
 
           <tr>
             <td style="padding: 0 30px 40px 30px; text-align: center;">
-              <a href="http://localhost:5173/shop?category=All"
+              <a href="https://urbangraphtees-fe.vercel.app//shop?category=All"
                 style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; padding: 16px 40px; font-size: 16px; font-weight: bold; letter-spacing: 1px; border-radius: 4px; text-transform: uppercase;">
                 Start Shopping
               </a>
@@ -264,7 +264,7 @@ const forgotPassword = async (req, res) => {
       { expiresIn: '15m' }
     );
 
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetLink = `https://urbangraphtees-fe.vercel.app//reset-password/${resetToken}`;
     // change this to your frontend URL
 
     // Send email using nodemailer
@@ -318,19 +318,19 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 min
     await user.save();
 
-    const resetUrl = `http://localhost:5173/auth/reset-password:token/${resetToken}`;
+    const resetUrl = `https://urbangraphtees-fe.vercel.app//auth/reset-password:token/${resetToken}`;
 
     // Send Email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.NODE_MAIL,
+        pass: process.env.MAIL_PASS,
       },
     });
 
     const mailOptions = {
-      from: "UrbanGraphTees",
+      from: process.env.NODE_MAIL,
       to: email,
       subject: "Password Reset Request",
       html: `
