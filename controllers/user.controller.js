@@ -30,7 +30,7 @@ const signUp = async (req, res) => {
   try {
     const existingUser = await UserModel.findOne({ email })
     if (existingUser) {
-      return res.status(400).json({ message: '❌ User already exists' })
+      return res.status(400).json({ message: 'User already exists' })
 
     }
     let saltRounds = 10
@@ -41,11 +41,13 @@ const signUp = async (req, res) => {
     if (user) {
       res.status(201).json({
         success: true,
-        message: '✔ Account created successfully',
+        message: 'Account created successfully',
         _id: user._id,
         fullName: user.fullName,
         email: user.email,
-        token: generateToken(user._id)
+        token: generateToken(user._id),
+        isAdmin: user.isAdmin,
+        createdAt:user.createdAt
       })
 
       let transporter = nodemailer.createTransport({
@@ -55,7 +57,7 @@ const signUp = async (req, res) => {
           pass: process.env.MAIL_PASS
         }
       });
-      // res.send({ status: true, message: '✔ Account created successfully' })
+      // res.send({ status: true, message: 'Account created successfully' })
       // const emailTemplatePath = path.join(__dirname, '/views/email-template/welcome-email.ejs')
       let mailOptions = {
         from: process.env.NODE_MAIL,
@@ -214,7 +216,7 @@ const signUp = async (req, res) => {
   } catch (error) {
     if (error) {
       console.error("Signup error:", error);
-      res.status(500).json({ message: '❌ Internal server error' });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -233,21 +235,23 @@ const logIn = async (req, res) => {
       if (comparePassword) {
         return res.status(200).json({
           success: true,
-          message: '✔ Signed In Successfully',
+          message: 'Signed In Successfully',
           token: generateToken(user._id),
           user: {
             _id: user._id,
             fullName: user.fullName,
             email: user.email,
-            userName: user.userName
+            userName: user.userName,
+            isAdmin : user.isAdmin,
+            createdAt:user.createdAt
           }
         });
       }
       else {
-        return res.status(400).json({ success: false, message: '❌ Invalid Credentials' })
+        return res.status(400).json({ success: false, message: 'Invalid Credentials' })
       }
     } else {
-      return res.status(400).json({ success: false, message: '❌ User not found' })
+      return res.status(400).json({ success: false, message: 'User not found' })
     }
   } catch (error) {
     console.log(error);
@@ -274,7 +278,7 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    const resetUrl = " https://urbangraphtees-fe.vercel.app/reset-password/${resetToken}";
+    const resetUrl = `https://urbangraphtees-fe.vercel.app/reset-password/${resetToken}`;
 
     // Send reset link via email
     const transporter = nodemailer.createTransport({
@@ -360,7 +364,7 @@ const forgotPassword = async (req, res) => {
 //       return res.status(404).json({ message: "User not found" });
 //     }
 
-    // Generate reset token
+// Generate reset token
 //     const resetToken = crypto.randomBytes(32).toString("hex");
 //     const resetTokenHash = crypto
 //       .createHash("sha256")
@@ -431,7 +435,7 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    res.status(200).json({ success: true, message: "Password reset successful. You can now log in." });
+    res.status(201).json({ success: true, message: "Password reset successful. You can now log in." });
   } catch (error) {
     console.error("Reset Password Error:", error);
     res.status(500).json({ message: "Server error" });
