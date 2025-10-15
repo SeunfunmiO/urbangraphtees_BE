@@ -12,6 +12,8 @@ const cloudinary = require('cloudinary').v2
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+const crypto = require("crypto");
+
 
 
 
@@ -253,51 +255,8 @@ const logIn = async (req, res) => {
   }
 }
 
+
 const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body
-    let user = await UserModel.findOne({ email })
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    const resetToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    const resetLink = `https://urbangraphtees-fe.vercel.app//reset-password/${resetToken}`;
-    // change this to your frontend URL
-
-    // Send email using nodemailer
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODE_MAIL,
-        pass: process.env.MAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.NODE_MAIL,
-      to: email,
-      subject: 'Password Reset Request',
-      html: `
-        <p>Hi ${user.fullName},</p>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link is valid for only 15 minutes.</p>
-      `,
-    });
-
-    res.status(200).json({ message: 'Password reset link sent to your email.' });
-  }
-  catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error: error.message });
-
-  }
-}
-
-// Reset Password Controller
-const resetPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await UserModel.findOne({ email });
@@ -308,19 +267,16 @@ const resetPassword = async (req, res) => {
 
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetTokenHash = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-    // Save hashed token & expiry in DB
+    // Save to DB with expiry (10 mins)
     user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 min
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    const resetUrl = `https://urbangraphtees-fe.vercel.app//auth/reset-password:token/${resetToken}`;
+    const resetUrl = " https://urbangraphtees-fe.vercel.app/reset-password/${resetToken}";
 
-    // Send Email
+    // Send reset link via email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -334,50 +290,161 @@ const resetPassword = async (req, res) => {
       to: email,
       subject: "Password Reset Request",
       html: `
-        <p>Hello ${user.fullName || "there"},</p>
-        <p>You requested to reset your password. Click the link below to reset it:</p>
-        <a href="${resetUrl}" target="_blank" 
-        style="background:#000;color:#fff;padding:10px 15px;text-decoration:none;border-radius:5px;">
-        Reset Password</a>
-        <p>This link will expire in 10 minutes.</p>
-        <p>If you did not request this, please ignore this email.</p>
+        <h3>Hello ${user.fullName},</h3>
+        <p>You requested to reset your password.</p>
+        <p>Click the link below to reset it. This link expires in 10 minutes.</p>
+        <a href="${resetUrl}" target="_blank"
+          style="background:#000;color:#fff;padding:10px 15px;text-decoration:none;border-radius:5px;">
+          Reset Password
+        </a>
+        <p>If you didn’t request this, please ignore this email.</p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: "Reset link sent to your email." });
 
-    res.status(200).json({
-      success: true,
-      message: "Password reset email sent successfully",
-    });
   } catch (error) {
     console.error("Forgot Password Error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// const forgotPassword = async (req, res) => {
 //   try {
-//     const { token } = req.params;
-//     const { newPassword } = req.body;
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const user = await UserModel.findById(decoded.id);
-
+//     const { email } = req.body
+//     let user = await UserModel.findOne({ email })
 //     if (!user) return res.status(404).json({ message: 'User not found' });
+//     const resetToken = jwt.sign(
+//       { id: user._id },
+//       process.env.JWT_SECRET,
+//       { expiresIn: '15m' }
+//     );
 
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-//     user.password = hashedPassword;
+//     const resetLink = `https://urbangraphtees-fe.vercel.app//reset-password/${resetToken}`;
+//     const transporter = nodemailer.createTransport({
+//       service: 'gmail',
+//       auth: {
+//         user: process.env.NODE_MAIL,
+//         pass: process.env.MAIL_PASS,
+//       },
+//     });
+
+//     await transporter.sendMail({
+//       from: process.env.NODE_MAIL,
+//       to: email,
+//       subject: 'Password Reset Request',
+//       html: `
+//         <p>Hi ${user.fullName},</p>
+//         <p>Click the link below to reset your password:</p>
+//         <a href="${resetLink}">${resetLink}</a>
+//         <p>This link is valid for only 15 minutes.</p>
+//       `,
+//     });
+
+//     res.status(200).json({ message: 'Password reset link sent to your email.' });
+//   }
+//   catch (error) {
+//     res.status(500).json({ message: 'Something went wrong', error: error.message });
+
+//   }
+// }
+
+// Reset Password Controller
+// const resetPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const user = await UserModel.findOne({ email });
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+    // Generate reset token
+//     const resetToken = crypto.randomBytes(32).toString("hex");
+//     const resetTokenHash = crypto
+//       .createHash("sha256")
+//       .update(resetToken)
+//       .digest("hex");
+
+
+//     user.resetPasswordToken = resetTokenHash;
+//     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 min
 //     await user.save();
 
-//     res.status(200).json({ message: 'Password reset successfully!' });
+//     const resetUrl = `https://urbangraphtees-fe.vercel.app//auth/reset-password:token/${resetToken}`;
+
+
+//     const transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         user: process.env.NODE_MAIL,
+//         pass: process.env.MAIL_PASS,
+//       },
+//     });
+
+//     const mailOptions = {
+//       from: process.env.NODE_MAIL,
+//       to: email,
+//       subject: "Password Reset Request",
+//       html: `
+//         <p>Hello ${user.fullName || "there"},</p>
+//         <p>You requested to reset your password. Click the link below to reset it:</p>
+//         <a href="${resetUrl}" target="_blank" 
+//         style="background:#000;color:#fff;padding:10px 15px;text-decoration:none;border-radius:5px;">
+//         Reset Password</a>
+//         <p>This link will expire in 10 minutes.</p>
+//         <p>If you did not request this, please ignore this email.</p>
+//       `,
+//     };
+
+//     await transporter.sendMail(mailOptions);
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Password reset email sent successfully",
+//     });
 //   } catch (error) {
-//     res.status(400).json({ message: 'Invalid or expired token' });
+//     console.error("Forgot Password Error:", error);
+//     res.status(500).json({ message: "Server error" });
 //   }
 // };
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await UserModel.findOne({
+      resetPasswordToken: resetTokenHash,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password reset successful. You can now log in." });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id; // from JWT
-    await User.findByIdAndDelete(userId);
+    const deleteUser = await User.findByIdAndDelete(userId);
+    if (!deleteUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
@@ -385,4 +452,4 @@ const deleteAccount = async (req, res) => {
 };
 
 
-module.exports = { signUp, logIn, register, forgotPassword, resetPassword , deleteAccount }
+module.exports = { signUp, logIn, register, forgotPassword, resetPassword, deleteAccount }
