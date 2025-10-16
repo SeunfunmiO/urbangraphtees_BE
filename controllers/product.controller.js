@@ -11,14 +11,16 @@ cloudinary.config({
 
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, stock, discount, category, material, image, inStock, colors, sizes } = req.body;
+        const { name, price, description, stock, discount, category, material, colors, sizes, images } = req.body;
 
-        // Upload images to Cloudinary
-        const images = [];
-        if (req.files) {
-            for (const file of req.files) {
-                const result = await cloudinary.uploader.upload(file.path);
-                images.push({ url: result.secure_url, public_id: result.public_id });
+        let uploadImages = []
+
+        if (images && images.length > 0) {
+            for (const img of images) {
+                const result = await cloudinary.uploader.upload(img, {
+                    resource_type: 'image'
+                })
+                uploadImages.push({ url: result.secure_url, public_id: result.public_id })
             }
         }
 
@@ -29,30 +31,20 @@ const createProduct = async (req, res) => {
             stock,
             discount,
             category,
-            image,
+            image: uploadImages,
             material,
             sizes,
             colors,
-            inStock,
-            lastUpdated
+            inStock: stock > 0 ? true : false,
+            lastUpdated: new Date()
         });
 
-        res.status(201).json(product);
+        res.status(201).json({ success: true, message: 'Product created successfully', product });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-const addProduct = async (req, res) => {
-    try {
-        const newProduct = new productModel(req.body);
-        await newProduct.save()
-        message = 'Product Confirmed';
-        res.status(201).json({ message: 'Product added successfully', product: newProduct })
-    } catch (error) {
-        res.status(500).json({ message: 'Error adding products', error: error.message })
-    }
-}
 const getAllProducts = async (req, res) => {
     try {
         const products = await productModel.find().sort({ createdAt: -1 })
@@ -104,6 +96,6 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-module.exports = { addProduct, getAllProducts, getProductById, deleteProduct, createProduct, updateProduct }
+module.exports = { getAllProducts, getProductById, deleteProduct, createProduct, updateProduct }
 
 
