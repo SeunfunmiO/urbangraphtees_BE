@@ -9,13 +9,14 @@ dotenv.config();
 const userRoute = require('./routes/user.routes.js');
 const newsletterRoute = require('./routes/newsletter.routes.js')
 const productRoute = require('./routes/product.routes.js')
+const adminRoute = require('./routes/admin.routes.js')
 const path = require('path')
-app.use(express.urlencoded({ extended: true }))  //body parser from express js
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use('/user', userRoute)
 app.use('/newsletter', newsletterRoute)
 app.use('/products', productRoute)
-
+app.use('/admin', adminRoute)
 
 let URI = process.env.DATABASE_URI
 mongoose.connect(URI)

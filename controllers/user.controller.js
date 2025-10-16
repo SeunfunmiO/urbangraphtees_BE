@@ -8,7 +8,7 @@ dotenv.config()
 const ejs = require('ejs')
 const path = require('path')
 const generateToken = require('../utils/generateToken')
-const cloudinary = require('cloudinary').v2
+// const cloudinary = require('cloudinary').v2
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -17,11 +17,11 @@ const crypto = require("crypto");
 
 
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_KEY,
-  api_secret: process.env.CLOUD_SECRET
-})
+// cloudinary.config({
+//   cloud_name: process.env.CLOUD_NAME,
+//   api_key: process.env.CLOUD_KEY,
+//   api_secret: process.env.CLOUD_SECRET
+// })
 
 
 const signUp = async (req, res) => {
