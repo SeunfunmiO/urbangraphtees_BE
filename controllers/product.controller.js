@@ -11,17 +11,17 @@ cloudinary.config({
 
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, stock, discount, category, material, colors, sizes, images } = req.body;
+        const { name, price, description, stock, discount, category, material, colors, sizes, image } = req.body;
 
-        let uploadImages = []
+        let uploadImages = [];
 
-        if (images && images.length > 0) {
-            for (const img of images) {
-                const result = await cloudinary.uploader.upload(img, {
+        if (image && image.length > 0) {
+            // for (const img of images) {
+                const result = await cloudinary.uploader.upload(image, {
                     resource_type: 'image'
                 })
                 uploadImages.push({ url: result.secure_url, public_id: result.public_id })
-            }
+            // }
         }
 
         const product = await productModel.create({
@@ -31,7 +31,7 @@ const createProduct = async (req, res) => {
             stock,
             discount,
             category,
-            images: uploadImages,
+            uploadImages,
             material,
             sizes,
             colors,
