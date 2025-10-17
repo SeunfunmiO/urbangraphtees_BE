@@ -325,7 +325,7 @@ const resetPassword = async (req, res) => {
 
     // verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await UserModel.findById(decoded._id);
+    const user = await UserModel.findById(decoded.id);
 
     if (!user) {
       return res.status(400).json({ message: "Invalid token or user not found" });
@@ -372,7 +372,7 @@ const resetPassword = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const userId = req.user._id; // from JWT
+    const userId = req.user.id; // from JWT
     const deleteUser = await UserModel.findByIdAndDelete(userId);
     if (!deleteUser) {
       return res.status(404).json({ message: 'User not found' });
