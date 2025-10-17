@@ -31,7 +31,7 @@ const createProduct = async (req, res) => {
             stock,
             discount,
             category,
-            image: uploadImages,
+            images: uploadImages,
             material,
             sizes,
             colors,
