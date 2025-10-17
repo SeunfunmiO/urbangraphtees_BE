@@ -4,7 +4,7 @@ const { getAllProducts, getProductById, deleteProduct, createProduct, updateProd
 const { protect, adminOnly } = require('../middleware/auth.middleware.js');
 
 
-router.post('/product', protect, adminOnly, createProduct)
+router.post('/product', protect, createProduct)
 router.get('/product', getAllProducts)
 router.get('/product/:id', getProductById)
 router.put('/product/:id', protect, adminOnly, updateProduct)

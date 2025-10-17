@@ -4,18 +4,18 @@ dotenv.config()
 const ejs = require('ejs')
 const path = require('path')
 const app = express()
-const User = require("../models/user.model.js");
-const Product = require("../models/product.model.js");
-const Order = require("../models/order.model.js");
+const UserModel = require('../models/user.model.js')
+const productModel = require('../models/product.model.js')
+const orderModel = require('../models/order.model.js')
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 
 const adminOnly = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments();
-        const totalProducts = await Product.countDocuments();
-        const totalOrders = await Order.countDocuments();
+        const totalUsers = await UserModel.countDocuments();
+        const totalProducts = await productModel.countDocuments();
+        const totalOrders = await orderModel.countDocuments();
 
         res.json({
             success: true,
