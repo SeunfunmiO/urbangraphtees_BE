@@ -66,30 +66,78 @@ const getProductById = async (req, res) => {
         res.status(500).json({ status: false, message: 'Error fetching product', error: error.message })
     }
 }
+
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const updated = await productModel.findByIdAndUpdate(id, req.body, { new: true });
-        res.json(updated);
+        const { name, price, description, material, sizes, colors, stock, discount, category, inStock, images } = req.body;
+
+        const product = await productModel.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // 🔹 If a new image is provided, replace the old ones
+        if (oldImage) {
+
+            if (product.oldImage && product.oldImage.length > 0) {
+                for (const img of product.images) {
+                    await cloudinary.uploader.destroy(img.public_id);
+                }
+            }
+
+            const uploadedImage = await cloudinary.uploader.upload(images, {
+                folder: "urbangraphtees/products",
+                resource_type: "image",
+            });
+
+            product.images = [
+                {
+                    url: uploadedImage.secure_url,
+                    public_id: uploadedImage.public_id,
+                },
+            ];
+        }
+
+        if (name) product.name = name;
+        if (price) product.price = price;
+        if (description) product.description = description;
+        if (material) product.material = material;
+        if (sizes) product.sizes = sizes;
+        if (colors) product.colors = colors;
+        if (stock) product.stock = stock;
+        if (discount) product.discount = discount;
+        if (category) product.category = category;
+        if (typeof inStock !== "undefined") product.inStock = inStock;
+        if (images) product.images = uploadedImage
+
+        const updatedProduct = await product.save();
+
+        res.status(200).json({
+            message: "Product updated successfully",
+            updatedProduct,
+        });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Error updating product:", err);
+        res.status(500).json({ message: "Error updating product", error: err.message });
     }
 };
-
 
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const product = await productModel.findById(id);
 
-
-        if (product.images.length > 0) {
+        if (!product) {
+            return res.status(404).json({ message: 'Products not found' })
+        }
+        if (product.images && product.images.length > 0) {
             for (const image of product.images) {
                 await cloudinary.uploader.destroy(image.public_id);
             }
         }
 
-        await product.deleteOne();
+        await productModel.findByIdAndDelete(id);
         res.json({ message: "Product deleted successfully" });
     } catch (error) {
         res.status(500).json({ status: false, message: 'Error deleting product', error: error.message })
