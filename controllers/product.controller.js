@@ -67,49 +67,119 @@ const getProductById = async (req, res) => {
     }
 }
 
+// const updateProduct = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { name, price, description, material, sizes, colors, stock, discount, category, inStock, images } = req.body;
+
+//         const product = await productModel.findById(id);
+//         if (!product) {
+//             return res.status(404).json({ message: "Product not found" });
+//         }
+
+
+//         if (oldImage) {
+
+//             if (product.oldImage && product.oldImage.length > 0) {
+//                 for (const img of product.images) {
+//                     await cloudinary.uploader.destroy(img.public_id);
+//                 }
+//             }
+
+//             const uploadedImage = await cloudinary.uploader.upload(images, {
+//                 folder: "urbangraphtees/products",
+//                 resource_type: "image",
+//             });
+
+//             product.images = [
+//                 {
+//                     url: uploadedImage.secure_url,
+//                     public_id: uploadedImage.public_id,
+//                 },
+//             ];
+//         }
+
+//         if (name) product.name = name;
+//         if (price) product.price = price;
+//         if (description) product.description = description;
+//         if (material) product.material = material;
+//         if (sizes) product.sizes = sizes;
+//         if (colors) product.colors = colors;
+//         if (stock) product.stock = stock;
+//         if (discount) product.discount = discount;
+//         if (category) product.category = category;
+//         if (typeof inStock !== "undefined") product.inStock = inStock;
+
+//         const updatedProduct = await product.save();
+
+//         res.status(200).json({
+//             message: "Product updated successfully",
+//             updatedProduct,
+//         });
+//     } catch (err) {
+//         console.error("Error updating product:", err);
+//         res.status(500).json({ message: "Error updating product", error: err.message });
+//     }
+// };
+
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, price, description, material, sizes, colors, stock, discount, category, inStock, images } = req.body;
+        const {
+            name,
+            price,
+            description,
+            material,
+            sizes,
+            colors,
+            stock,
+            discount,
+            category,
+            inStock,
+            images, // this can be a string (single image) or an array of images
+        } = req.body;
 
         const product = await productModel.findById(id);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        // 🔹 If a new image is provided, replace the old ones
-        if (oldImage) {
+        let updatedImages = product.images; // keep old images by default
 
-            if (product.oldImage && product.oldImage.length > 0) {
-                for (const img of product.images) {
-                    await cloudinary.uploader.destroy(img.public_id);
-                }
+        // 🖼 If new images are uploaded
+        if (images && images.length > 0) {
+            // delete old ones from Cloudinary
+            for (const img of product.images) {
+                await cloudinary.uploader.destroy(img.public_id);
             }
 
-            const uploadedImage = await cloudinary.uploader.upload(images, {
-                folder: "urbangraphtees/products",
-                resource_type: "image",
-            });
-
-            product.images = [
-                {
-                    url: uploadedImage.secure_url,
-                    public_id: uploadedImage.public_id,
-                },
-            ];
+            // upload new images
+            const uploadedImages = [];
+            for (const img of images) {
+                const uploaded = await cloudinary.uploader.upload(img, {
+                    folder: "urbangraphtees/products",
+                    resource_type: "image",
+                });
+                uploadedImages.push({
+                    url: uploaded.secure_url,
+                    public_id: uploaded.public_id,
+                });
+            }
+            updatedImages = uploadedImages;
         }
 
-        if (name) product.name = name;
-        if (price) product.price = price;
-        if (description) product.description = description;
-        if (material) product.material = material;
-        if (sizes) product.sizes = sizes;
-        if (colors) product.colors = colors;
-        if (stock) product.stock = stock;
-        if (discount) product.discount = discount;
-        if (category) product.category = category;
-        if (typeof inStock !== "undefined") product.inStock = inStock;
-        if (images) product.images = uploadedImage
+        // 🔁 Update all other fields
+        product.name = name || product.name;
+        product.price = price || product.price;
+        product.description = description || product.description;
+        product.material = material || product.material;
+        product.sizes = sizes || product.sizes;
+        product.colors = colors || product.colors;
+        product.stock = stock || product.stock;
+        product.discount = discount || product.discount;
+        product.category = category || product.category;
+        product.inStock = typeof inStock !== "undefined" ? inStock : product.inStock;
+        product.images = updatedImages;
 
         const updatedProduct = await product.save();
 
@@ -119,7 +189,9 @@ const updateProduct = async (req, res) => {
         });
     } catch (err) {
         console.error("Error updating product:", err);
-        res.status(500).json({ message: "Error updating product", error: err.message });
+        res
+            .status(500)
+            .json({ message: "Error updating product", error: err.message });
     }
 };
 
