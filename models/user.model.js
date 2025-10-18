@@ -23,5 +23,4 @@ let UserSchema = mongoose.Schema({
 
 
 let UserModel = mongoose.model('user', UserSchema)
-
 module.exports = UserModel;

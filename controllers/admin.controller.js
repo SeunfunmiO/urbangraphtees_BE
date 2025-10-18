@@ -11,7 +11,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 
-const adminOnly = async (req, res) => {
+const AdminOnly = async (req, res) => {
     try {
         const totalUsers = await UserModel.countDocuments();
         const totalProducts = await productModel.countDocuments();
@@ -29,4 +29,4 @@ const adminOnly = async (req, res) => {
     }
 }
 
-module.exports = {adminOnly}
+module.exports = {AdminOnly}
