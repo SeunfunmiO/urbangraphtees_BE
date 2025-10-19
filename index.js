@@ -11,6 +11,9 @@ const newsletterRoute = require('./routes/newsletter.routes.js')
 const productRoute = require('./routes/product.routes.js')
 const adminRoute = require('./routes/admin.routes.js')
 const orderRoute = require('./routes/order.routes.js')
+const wishlistRoute = require('./routes/wishlist.routes.js')
+const cartRoute = require('./routes/cart.routes.js')
+const notificationRoute = require('./routes/notification.routes.js')
 const path = require('path')
 app.use(express.urlencoded({limit:'5mb' ,extended: true }))
 app.use(express.json({limit:'5mb'}))
@@ -19,6 +22,10 @@ app.use('/newsletter', newsletterRoute)
 app.use('/products', productRoute)
 app.use('/admin', adminRoute)
 app.use('/orders', orderRoute)
+app.use('/wishlist', wishlistRoute)
+app.use('/cart', cartRoute)
+app.use('/notification', notificationRoute)
+
 
 
 let URI = process.env.DATABASE_URI
