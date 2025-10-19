@@ -67,6 +67,15 @@ const getProductById = async (req, res) => {
     }
 }
 
+const getProductsByTag = async (req, res) => {
+    try {
+        const { tag } = req.params;
+        const products = await productModel.find({tag}) 
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({message:"Error fetching tagged products"})
+    }
+}
 // const updateProduct = async (req, res) => {
 //     try {
 //         const { id } = req.params;
@@ -136,7 +145,7 @@ const updateProduct = async (req, res) => {
             discount,
             category,
             inStock,
-            images, // this can be a string (single image) or an array of images
+            images,
         } = req.body;
 
         const product = await productModel.findById(id);
@@ -144,16 +153,13 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        let updatedImages = product.images; // keep old images by default
+        let updatedImages = product.images;
 
-        // 🖼 If new images are uploaded
         if (images && images.length > 0) {
-            // delete old ones from Cloudinary
             for (const img of product.images) {
                 await cloudinary.uploader.destroy(img.public_id);
             }
 
-            // upload new images
             const uploadedImages = [];
             for (const img of images) {
                 const uploaded = await cloudinary.uploader.upload(img, {
@@ -167,8 +173,6 @@ const updateProduct = async (req, res) => {
             }
             updatedImages = uploadedImages;
         }
-
-        // 🔁 Update all other fields
         product.name = name || product.name;
         product.price = price || product.price;
         product.description = description || product.description;
@@ -216,6 +220,6 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-module.exports = { getAllProducts, getProductById, deleteProduct, createProduct, updateProduct }
+module.exports = { getAllProducts, getProductById, deleteProduct, createProduct, updateProduct , getProductsByTag}
 
 
