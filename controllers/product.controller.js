@@ -11,7 +11,7 @@ cloudinary.config({
 
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, stock, discount, category, material, colors, sizes, images } = req.body;
+        const { name, price, description, stock, discount, category, material, colors, sizes, images, tag } = req.body;
 
         let uploadImages = [];
 
@@ -35,6 +35,7 @@ const createProduct = async (req, res) => {
             material,
             sizes,
             colors,
+            tag: tag || "none",
             inStock: stock > 0 ? true : false,
             lastUpdated: new Date()
         });
@@ -70,10 +71,10 @@ const getProductById = async (req, res) => {
 const getProductsByTag = async (req, res) => {
     try {
         const { tag } = req.params;
-        const products = await productModel.find({tag}) 
+        const products = await productModel.find({ tag })
         res.status(200).json(products);
     } catch (error) {
-        res.status(500).json({message:"Error fetching tagged products"})
+        res.status(500).json({ message: "Error fetching tagged products" })
     }
 }
 // const updateProduct = async (req, res) => {
@@ -146,6 +147,7 @@ const updateProduct = async (req, res) => {
             category,
             inStock,
             images,
+            tag,
         } = req.body;
 
         const product = await productModel.findById(id);
@@ -182,6 +184,7 @@ const updateProduct = async (req, res) => {
         product.stock = stock || product.stock;
         product.discount = discount || product.discount;
         product.category = category || product.category;
+        product.tag = tag || product.tag;
         product.inStock = typeof inStock !== "undefined" ? inStock : product.inStock;
         product.images = updatedImages;
 
@@ -220,6 +223,6 @@ const deleteProduct = async (req, res) => {
     }
 }
 
-module.exports = { getAllProducts, getProductById, deleteProduct, createProduct, updateProduct , getProductsByTag}
+module.exports = { getAllProducts, getProductById, deleteProduct, createProduct, updateProduct, getProductsByTag }
 
 
