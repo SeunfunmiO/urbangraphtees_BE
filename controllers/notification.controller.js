@@ -41,10 +41,24 @@ const markAsRead = async (req, res) => {
   }
 };
 
+const markAsUnread = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const notification = await notificationModel.findByIdAndUpdate(
+      id,
+      { isRead: false },
+      { new: true }
+    );
+    res.status(200).json(notification);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 const markAllAsRead = async (req, res) => {
   try {
     const userId = req.user._id;
-    await notificationModel.updateMany({ userId }, { isRead: true });
+    await notificationModel.updateMany({ userId , isRead:false}, { isRead: true });
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,6 +90,7 @@ module.exports = {
   createNotification,
   getUserNotifications,
   markAsRead,
+  markAsUnread,
   markAllAsRead,
   deleteNotification,
   clearAllNotifications
