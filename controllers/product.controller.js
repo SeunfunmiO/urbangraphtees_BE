@@ -33,8 +33,8 @@ const createProduct = async (req, res) => {
             category,
             images: uploadImages,
             material,
-            sizes,
-            colors,
+            sizes: Array.isArray(sizes) ? sizes : typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()) : [],
+            colors: Array.isArray(colors) ? colors : typeof colors === 'string' ? colors.split(',').map(c => c.trim()): [],
             tag: tag || "none",
             inStock: stock > 0 ? true : false,
             lastUpdated: new Date()
