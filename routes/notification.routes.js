@@ -1,15 +1,14 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const { createNotification, getUserNotifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = require('../controllers/notification.controller');
+const { protect } = require('../middleware/auth.middleware');
 
-const notificationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  message: { type: String, required: true },
-  type: { 
-    type: String, 
-    enum: ['success', 'info', 'warning', 'error'], 
-    default: 'info' 
-  },
-  isRead: { type: Boolean, default: false },
-}, { timestamps: true });
 
-const notificationModel = mongoose.model('Notification', notificationSchema);
-module.exports = notificationModel;
+router.post('/', protect, createNotification);
+router.get('/', protect, getUserNotifications);
+router.put('/read/:id', protect, markAsRead);
+router.put('/read-all', protect, markAllAsRead);
+router.delete('/:id', protect, deleteNotification);
+router.delete('/', protect, clearAllNotifications);
+
+module.exports = router;
