@@ -157,9 +157,16 @@ const updateProduct = async (req, res) => {
 
         let updatedImages = product.images;
 
-        if (images && images.length > 0) {
-            for (const img of product.images) {
-                await cloudinary.uploader.destroy(img.public_id);
+        // if (images && images.length > 0) {
+        //     for (const img of product.images) {
+        //         await cloudinary.uploader.destroy(img.public_id);
+        //     }
+
+        if (images && Array.isArray(images) && images.length > 0) {
+            if (product.images && Array.isArray(product.images)) {
+                for (const img of product.images) {
+                    await cloudinary.uploader.destroy(img.public_id);
+                }
             }
 
             const uploadedImages = [];
