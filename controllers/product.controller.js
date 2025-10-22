@@ -34,7 +34,7 @@ const createProduct = async (req, res) => {
             images: uploadImages,
             material,
             sizes: Array.isArray(sizes) ? sizes : typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()) : [],
-            colors: Array.isArray(colors) ? colors : typeof colors === 'string' ? colors.split(',').map(c => c.trim()): [],
+            colors: Array.isArray(colors) ? colors : typeof colors === 'string' ? colors.split(',').map(c => c.trim()) : [],
             tag: tag || "none",
             inStock: stock > 0 ? true : false,
             lastUpdated: new Date()
@@ -184,7 +184,9 @@ const updateProduct = async (req, res) => {
         product.stock = stock || product.stock;
         product.discount = discount || product.discount;
         product.category = category || product.category;
-        product.tag = tag || product.tag;
+        if (typeof tag !== "undefined") {
+            product.tag
+        }
         product.inStock = typeof inStock !== "undefined" ? inStock : product.inStock;
         product.images = updatedImages;
 

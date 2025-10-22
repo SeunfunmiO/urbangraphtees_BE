@@ -87,14 +87,14 @@ const updateUserRole = async (req, res) => {
         user.role = user.role === "admin" ? "user" : "admin";
         await user.save();
 
-        res.status(200).json({ message: "User role updated", role: user.role });
+        res.status(200).json({ message: "User role updated", role: user.role, user });
     } catch (error) {
         res.status(500).json({ message: "Error updating role" });
     }
 }
 const updateAdminProfile = async (req, res) => {
     try {
-        const adminId = req.user.id; 
+        const adminId = req.user.id;
         const { name, email } = req.body;
 
         const updatedAdmin = await UserModel.findByIdAndUpdate(
@@ -129,4 +129,4 @@ const changeAdminPassword = async (req, res) => {
         res.status(500).json({ message: "Error changing password" });
     }
 };
-module.exports = { AdminOnly, getAllUsers, deleteUser, updateUserRole , updateAdminProfile, changeAdminPassword }
+module.exports = { AdminOnly, getAllUsers, deleteUser, updateUserRole, updateAdminProfile, changeAdminPassword }
