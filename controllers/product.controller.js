@@ -191,9 +191,7 @@ const updateProduct = async (req, res) => {
         product.stock = stock || product.stock;
         product.discount = discount || product.discount;
         product.category = category || product.category;
-        if (typeof tag !== "undefined") {
-            product.tag
-        }
+        if (typeof tag !== "undefined") product.tag = tag
         product.inStock = typeof inStock !== "undefined" ? inStock : product.inStock;
         product.images = updatedImages;
 
