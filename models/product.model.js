@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     category: { type: String },
     tag: {
         type: String,
-        enum: ["new", "trending", "best-seller", "none"],
+        enum: ["new", "trending", "best seller", "none"],
         default: "none"
     },
     lastUpdated: { type: Date, default: Date.now },
