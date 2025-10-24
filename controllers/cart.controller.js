@@ -40,7 +40,7 @@ const addToCart = async (req, res) => {
       cart.items.push({
         productId,
         quantity,
-        price: product.price, 
+        price: product.price,
         name: product.name,
         image: product.images,
       });
@@ -83,6 +83,33 @@ const updateCartItem = async (req, res) => {
   }
 };
 
+removeCartItem = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const productId = req.params.productId;
+
+    let cart = await cartModel.findOne({ userId });
+
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    cart.items = cart.items.filter(
+      (item) => item.productId.toString() !== productId
+    );
+
+    await cart.save();
+
+    return res.status(200).json({
+      message: 'Item removed from cart',
+      items: cart.items,
+    });
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 const clearCart = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -93,5 +120,5 @@ const clearCart = async (req, res) => {
   }
 };
 
-module.exports = { addToCart, getCart, updateCartItem, clearCart }
+module.exports = { addToCart, getCart, updateCartItem, removeCartItem, clearCart }
 
