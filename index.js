@@ -2,13 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
-app.use(cors({
-    origin: [
-        "http://localhost:5173/",
-        "https://urbangraphtees-fe.vercel.app/"
-    ],
-    credentials: true
-}));
+app.use(cors());
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -21,8 +15,8 @@ const wishlistRoute = require('./routes/wishlist.routes.js')
 const cartRoute = require('./routes/cart.routes.js')
 const notificationRoute = require('./routes/notification.routes.js')
 const path = require('path')
-app.use(express.urlencoded({ limit: '5mb', extended: true }))
-app.use(express.json({ limit: '5mb' }))
+app.use(express.urlencoded({limit:'5mb' ,extended: true }))
+app.use(express.json({limit:'5mb'}))
 app.use('/user', userRoute)
 app.use('/newsletter', newsletterRoute)
 app.use('/products', productRoute)
