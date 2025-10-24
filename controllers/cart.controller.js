@@ -85,7 +85,7 @@ const updateCartItem = async (req, res) => {
 
 removeCartItem = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const productId = req.params.productId;
 
     let cart = await cartModel.findOne({ userId });
