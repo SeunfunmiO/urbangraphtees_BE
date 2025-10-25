@@ -4,7 +4,7 @@ const productModel = require('../models/product.model.js');
 const getCart = async (req, res) => {
   try {
     const userId = req.user._id;
-    let cart = await cartModel.findOne({ userId }).populate('items.productId', price, image, size);
+    let cart = await cartModel.findOne({ userId }).populate('items.productId', "name price images sizes colors");
     if (!cart) {
       cart = await cartModel.create({ userId, items: [] });
     }
@@ -44,7 +44,7 @@ const addToCart = async (req, res) => {
         quantity,
         price: product.price,
         name: product.name,
-        image: product.images?.[0]?.url || product.images?.[0],
+        images: product.images,
         selectedColor,
       });
     }
