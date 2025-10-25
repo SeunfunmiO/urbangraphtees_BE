@@ -49,7 +49,8 @@ const addToCart = async (req, res) => {
         selectedSize
       });
     }
-
+    console.log(cart.items);
+    
     await cart.save();
 
     const populatedCart = await cartModel
