@@ -21,6 +21,8 @@ const getUserNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
     const notifications = await notificationModel.find({ userId }).sort({ createdAt: -1 });
+    console.log(notifications);
+    
     res.status(200).json(notifications);
   } catch (error) {
     res.status(500).json({ message: error.message });
