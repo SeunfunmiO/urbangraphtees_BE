@@ -1,6 +1,16 @@
 
 const wishlistModel = require("../models/wishlist.model.js");
 
+const getWishlist = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const wishlist = await wishlistModel.findOne({ userId }).populate("products", "name price images");
+        res.status(200).json(wishlist || { products: [] });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 const addToWishlist = async (req, res) => {
     try {
         const { userId, productId } = req.body;
@@ -36,15 +46,7 @@ const removeFromWishlist = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-const getWishlist = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const wishlist = await wishlistModel.findOne({ userId }).populate("products");
-        res.status(200).json(wishlist || { products: [] });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
+
 const clearWishlist = async (req, res) => {
     try {
         const { userId } = req.body;
