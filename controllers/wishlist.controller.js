@@ -4,7 +4,7 @@ const wishlistModel = require("../models/wishlist.model.js");
 const getWishlist = async (req, res) => {
     try {
         const { userId } = req.params;
-        const wishlist = await wishlistModel.findOne({ userId }).populate("products", "name price images");
+        const wishlist = await wishlistModel.findOne({ userId }).populate("products", "_id name price images");
         res.status(200).json(wishlist || { products: [] });
     } catch (err) {
         res.status(500).json({ message: err.message });
