@@ -4,13 +4,19 @@ const wishlistModel = require("../models/wishlist.model.js");
 const getWishlist = async (req, res) => {
     try {
         const { userId } = req.params;
-        const wishlist = await wishlistModel.findOne({ userId }).populate("products", "_id name price images");
-        res.status(200).json(wishlist || { products: [] });
+        const wishlist = await wishlistModel
+            .findOne({ userId })
+            .populate("products", "_id name price images");
+
+        if (!wishlist) {
+            return res.status(200).json({ products: [] });
+        }
+        res.status(200).json(wishlist);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Error fetching wishlist:", err);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
 const addToWishlist = async (req, res) => {
     try {
         const { userId, productId } = req.body;
