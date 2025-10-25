@@ -46,6 +46,7 @@ const addToCart = async (req, res) => {
         name: product.name,
         images: product.images,
         selectedColor,
+        selectedSize
       });
     }
 
