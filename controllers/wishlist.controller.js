@@ -45,5 +45,22 @@ const getWishlist = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+const clearWishlist = async (req, res) => {
+    try {
+        const { userId } = req.body;
 
-module.exports = { addToWishlist, removeFromWishlist, getWishlist }
+        const wishlist = await wishlistModel.findOne({ userId });
+        if (!wishlist) {
+            return res.status(404).json({ message: "Wishlist not found" });
+        }
+
+        wishlist.products = [];
+        await wishlist.save();
+
+        res.status(200).json({ message: "Wishlist cleared successfully", wishlist });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+module.exports = { addToWishlist, removeFromWishlist, getWishlist, clearWishlist }
