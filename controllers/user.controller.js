@@ -6,9 +6,10 @@ const nodemailer = require('nodemailer')
 const dotenv = require('dotenv')
 dotenv.config()
 const ejs = require('ejs')
+const { fileURLPath } = require('url')
 const path = require('path')
+const fs = require('fs')
 const generateToken = require('../utils/generateToken')
-// const cloudinary = require('cloudinary').v2
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -17,11 +18,6 @@ const crypto = require("crypto");
 
 
 
-// cloudinary.config({
-//   cloud_name: process.env.CLOUD_NAME,
-//   api_key: process.env.CLOUD_KEY,
-//   api_secret: process.env.CLOUD_SECRET
-// })
 
 
 const signUp = async (req, res) => {
@@ -50,175 +46,35 @@ const signUp = async (req, res) => {
         createdAt: user.createdAt
       })
 
-      let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.NODE_MAIL,
-          pass: process.env.MAIL_PASS
-        }
-      });
-      // res.send({ status: true, message: 'Account created successfully' })
-      // const emailTemplatePath = path.join(__dirname, '/views/email-template/welcome-email.ejs')
-      let mailOptions = {
-        from: process.env.NODE_MAIL,
-        to: email,
-        subject: 'Welcome to Urbangraphtees',
-        html: `<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to UrbanGraphTees</title>
-  <script src="https://kit.fontawesome.com/18ec6142ad.js" crossorigin="anonymous"></script>
-</head>
-
-<body style="margin: 0; padding: 0; font-family: 'Arial', sans-serif; background-color: #f4f4f4;">
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4;">
-    <tr>
-      <td style="padding: 40px 20px;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-          style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-
-          <tr>
-            <td style="background-color: #000000; padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: 2px;">
-                URBANGRAPHTEES
-              </h1>
-              <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 14px; letter-spacing: 1px;">
-                STREETWEAR • CULTURE • DESIGN
-              </p>
-            </td>
-          </tr>
-
-
-          <tr>
-<td style="background-color: #000000; padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: 2px;">
-                URBANGRAPHTEES
-              </h1>
-              <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 14px; letter-spacing: 1px;">
-                STREETWEAR • CULTURE • DESIGN
-              </p>
-            </td>
-
-            <td style="padding: 50px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #000000; font-size: 28px; font-weight: bold;">
-                Welcome, ${userName}! 👋
-              </h2>
-              <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
-                Thank you for joining the UrbanGraphTees (UGT) family! We're thrilled to have you as part of our
-                community of
-                style enthusiasts who appreciate bold designs and authentic streetwear.
-              </p>
-              <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
-                Your account is now active, and you're ready to explore our latest collections, exclusive drops, and
-                limited-edition designs.
-              </p>
-            </td>
-          </tr>
-
-
-          <tr>
-            <td style="padding: 0 30px 30px 30px;">
-              <div
-                style="background-color: #f9f9f9; border-left: 4px solid #000000; padding: 20px; margin-bottom: 20px;">
-                <h3 style="margin: 0 0 15px 0; color: #000000; font-size: 20px; font-weight: bold;">
-                  What's Next?
-                </h3>
-                <ul style="margin: 0; padding-left: 20px; color: #333333; font-size: 15px; line-height: 1.8;">
-                  <li>Browse our latest collection of graphic tees</li>
-                  <li>Get early access to new releases and exclusive drops</li>
-                  <li>Enjoy member-only discounts and promotions</li>
-                  <li>Track your orders and manage your wishlist</li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding: 0 30px 40px 30px; text-align: center;">
-              <a href="https://urbangraphtees-fe.vercel.app//shop?category=All"
-                style="display: inline-block; background-color: #000000; color: #ffffff; text-decoration: none; padding: 16px 40px; font-size: 16px; font-weight: bold; letter-spacing: 1px; border-radius: 4px; text-transform: uppercase;">
-                Start Shopping
-              </a>
-            </td>
-          </tr>
-
-
-          <tr>
-            <td style="padding: 0 30px 40px 30px;">
-              <div
-                style="background-color: #000000; color: #ffffff; padding: 25px; text-align: center; border-radius: 4px;">
-                <p style="margin: 0 0 10px 0; color: #ffffff; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;">
-                  Welcome Gift
-                </p>
-                <p style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #ffffff ">
-                  10% OFF
-                </p>
-                <p style="margin: 0 0 15px 0; font-size: 14px; color: #ffffff">
-                  Your First Order
-                </p>
-                <p
-                  style="margin: 0; font-size: 18px; font-weight: bold; letter-spacing: 2px; background-color: #ffffff; color: #000000; padding: 12px; display: inline-block; border-radius: 4px;">
-                  WELCOME10
-                </p>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding: 30px; text-align: center; border-top: 1px solid #eeeeee;">
-              <p style="margin: 0 0 15px 0; color: #666666; font-size: 14px;">
-                Follow us for style inspiration
-              </p>
-              <div>
-                <a href="https://www.instagram.com/urbangraphtees_thebrand/"
-                  style="display: inline-block; margin: 0 10px; color: #000000; text-decoration: none; font-weight: bold;">Instagram</a>
-                <a href="#"
-                  style="display: inline-block; margin: 0 10px; color: #000000; text-decoration: none; font-weight: bold;">Facebook</a>
-                <a href="#"
-                  style="display: inline-block; margin: 0 10px; color: #000000; text-decoration: none; font-weight: bold;">Twitter</a>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding: 30px; text-align: center; background-color: #f9f9f9;">
-              <p style="margin: 0 0 10px 0; color: #666666; font-size: 12px;">
-                Questions? Contact us at <a href="mailto:urbangraphtees@gmail.com"
-                  style="color: #000000; text-decoration: none;">urbangraphtees@gmail.com</a>
-              </p>
-              <p style="margin: 0; color: #999999; font-size: 11px;">
-                © 2025 Urbangraphtees. All rights reserved.<br>
-                Surulere, Lagos, Nigeria
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>`
-      }
     };
+    
+  const emailTemplatePath = path.join(__dirname, '/views/email-template/welcome-email.ejs');
+    let htmlContent = fs.readFileSync(emailTemplatePath, 'utf-8');
+    htmlContent = htmlContent.replace("{{userName}}", userName || "User");
 
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.NODE_MAIL,
+        pass: process.env.MAIL_PASS
       }
     });
-    // }
+
+    const mailOptions = {
+      from: `"Urbangraphtees" <${process.env.NODE_MAIL}>`,
+      to: email,
+      subject: 'Welcome to Urbangraphtees',
+      html: htmlContent
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.response);
+
   } catch (error) {
-    if (error) {
-      console.error("Signup error:", error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
+    console.error("Signup error:", error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
